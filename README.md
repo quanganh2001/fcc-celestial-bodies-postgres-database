@@ -414,3 +414,82 @@ universe=> SELECT * FROM galaxy;
 ```
 # Exporting the database
 You must recommended use Github interface to upload source code.
+# Running and fixing tests
+As you can see, there was error: SUBTASKS 1.1 :5 All tables should have a "name" column
+```txt
+universe=> \d blackhole
+                                     Table "public.blackhole"
++--------------+---------+-----------+----------+-------------------------------------------------+
+|    Column    |  Type   | Collation | Nullable |                     Default                     |
++--------------+---------+-----------+----------+-------------------------------------------------+
+| blackhole_id | integer |           | not null | nextval('blackhole_blackhole_id_seq'::regclass) |
+| gravity      | integer |           |          |                                                 |
+| galaxy_id    | integer |           |          |                                                 |
+| wormhole     | boolean |           | not null | false                                           |
++--------------+---------+-----------+----------+-------------------------------------------------+
+Indexes:
+    "blackhole_pkey" PRIMARY KEY, btree (blackhole_id)
+```
+*How do I fix?*
+```sql
+ALTER TABLE blackhole ADD COLUMN name VARCHAR(255) NOT NULL UNIQUE;
+```
+Output:
+```txt
+universe=> ALTER TABLE blackhole ADD COLUMN name VARCHAR(255) NOT NULL UNIQUE;
+ALTER TABLE
+universe=> \d blackhole
+                                             Table "public.blackhole"
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+|    Column    |          Type          | Collation | Nullable |                     Default                     |
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+| blackhole_id | integer                |           | not null | nextval('blackhole_blackhole_id_seq'::regclass) |
+| gravity      | integer                |           |          |                                                 |
+| galaxy_id    | integer                |           |          |                                                 |
+| wormhole     | boolean                |           | not null | false                                           |
+| name         | character varying(255) |           | not null |                                                 |
++--------------+------------------------+-----------+----------+-------------------------------------------------+
+Indexes:
+    "blackhole_pkey" PRIMARY KEY, btree (blackhole_id)
+    "blackhole_name_key" UNIQUE CONSTRAINT, btree (name)
+```
+Let's create 3 blackholes
+```sql
+INSERT INTO blackhole(name) VALUES ('bh1');
+INSERT INTO blackhole(name) VALUES ('bh2');
+INSERT INTO blackhole(name) VALUES ('bh3');
+```
+As you can see, there is only a requirement: At least one column from each table should be required to be `UNIQUE`.
+
+*How do I fix?*
+
+Type following command here:
+```sql
+ALTER TABLE galaxy ADD CONSTRAINT name_unique UNIQUE (name);
+```
+```txt
+universe=> ALTER TABLE galaxy ADD CONSTRAINT name_unique UNIQUE (name);
+ALTER TABLE
+universe=> \d galaxy
+                                            Table "public.galaxy"
++----------------+------------------------+-----------+----------+-------------------------------------------+
+|     Column     |          Type          | Collation | Nullable |                  Default                  |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+| galaxy_id      | integer                |           | not null | nextval('galaxy_galaxy_id_seq'::regclass) |
+| speed          | integer                |           |          |                                           |
+| description    | text                   |           |          |                                           |
+| name           | character varying(255) |           | not null |                                           |
+| rotation_speed | integer                |           | not null | 100000                                    |
++----------------+------------------------+-----------+----------+-------------------------------------------+
+Indexes:
+    "galaxy_pkey" PRIMARY KEY, btree (galaxy_id)
+    "name_unique" UNIQUE CONSTRAINT, btree (name)
+Referenced by:
+    TABLE "star" CONSTRAINT "fk_galaxy" FOREIGN KEY (galaxy_id) REFERENCES galaxy(galaxy_id)
+```
+Let's add 2 constraints for `star` and `planet` tables:
+```sql
+ALTER TABLE star ADD CONSTRAINT name_unique_star UNIQUE (name);
+ALTER TABLE planet ADD CONSTRAINT name_unique_planet UNIQUE (name);
+```
+Tutorial Complete! Congratulations!!!
