@@ -493,3 +493,5 @@ ALTER TABLE star ADD CONSTRAINT name_unique_star UNIQUE (name);
 ALTER TABLE planet ADD CONSTRAINT name_unique_planet UNIQUE (name);
 ```
 Tutorial Complete! Congratulations!!!
+
+Command dump to SQL file: `pg_dump -cC --inserts -U freecodecamp universe > universe.sql`
